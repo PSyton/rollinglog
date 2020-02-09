@@ -29,10 +29,10 @@ func TestCompress(t *testing.T) {
 
 	require.NoError(t, c.Compress())
 
-	info, err := os.Stat(c.sourceFile)
+	_, err := os.Stat(c.sourceFile)
 	assert.True(t, err != nil && os.IsNotExist(err), "source not deleted")
 
-	info, err = os.Stat(c.destFile)
+	info, err := os.Stat(c.destFile)
 	assert.True(t, err == nil && !info.IsDir(), "dest not found")
 	assert.Greater(t, info.Size(), int64(0), "zero compressed file")
 

@@ -26,11 +26,6 @@ func TestDefaults(t *testing.T) {
 	assert.False(t, l.localtime)
 }
 
-type testEH struct{}
-
-func (eh *testEH) OnError(aError error) {
-}
-
 func TestWidthErrorHandler(t *testing.T) {
 	l := New()
 

@@ -19,8 +19,7 @@ import (
 const (
 	backupTimeFormat string = "20060102150405.000"
 	compressSuffix   string = ".gz"
-	megabyte         uint64 = 1024 * 1024   // 1 MB
-	defaultMaxSize   uint64 = 50 * megabyte // 50 MB
+	megabyte         uint64 = 1024 * 1024 // 1 MB
 	fileMode                = 0644
 )
 
