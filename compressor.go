@@ -10,11 +10,9 @@ import (
 )
 
 type compressor struct {
-	destFile   string
-	sourceFile string
-
-	errors *multierror.Error
-
+	destFile      string
+	sourceFile    string
+	errors        *multierror.Error
 	src           *os.File
 	dst           *os.File
 	fileForRemove string

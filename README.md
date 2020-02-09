@@ -1,9 +1,8 @@
 # rollinglog [![Build Status](https://github.com/PSyton/rollinglog/workflows/test/badge.svg)](https://github.com/PSyton/rollinglog/actions) [![Go Report Card](https://goreportcard.com/badge/github.com/PSyton/rollinglog)](https://goreportcard.com/report/github.com/PSyton/rollinglog) [![Coverage Status](https://coveralls.io/repos/github/PSyton/rollinglog/badge.svg?branch=master)](https://coveralls.io/github/PSyton/rollinglog?branch=master)
 
-
 Package provides a simple rolling logger
 
-Inspired by lumberjack (https://github.com/natefinch/lumberjack)
+Inspired by lumberjack (<https://github.com/natefinch/lumberjack>)
 
 Rollinglog is intended to be one part of a logging infrastructure.
 It is not an all-in-one solution, but instead is a pluggable
