@@ -15,7 +15,7 @@ on:
       - '.golangci.yml'
 
 jobs:
-  backend:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
