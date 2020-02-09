@@ -306,6 +306,8 @@ func TestCollectFilesForSweep(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, len(b), n)
 
+		<-time.After(time.Millisecond * 10)
+
 		count, err := getFilesInDir(t, dir)
 		require.NoError(t, err)
 		assert.Equal(t, i+1, count)
@@ -505,8 +507,8 @@ func TestConcurency(t *testing.T) {
 
 func makeTempDir(name string, t *testing.T) string {
 	dir := time.Now().Format(name + backupTimeFormat)
-	dir = filepath.Join(os.TempDir(), dir)
-	require.NoError(t, os.Mkdir(dir, 0700))
+	dir = filepath.Join(".tests", dir)
+	require.NoError(t, os.MkdirAll(dir, 0700))
 	return dir
 }
 
