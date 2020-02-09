@@ -31,7 +31,7 @@ log.SetOutput(logger)
 
 ...
 // Close the logger
-l.Close()
+logger.Close()
 
 ```
 
