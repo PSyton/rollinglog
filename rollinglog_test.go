@@ -293,6 +293,8 @@ func TestCollectFilesForSweep(t *testing.T) {
 		assert.Equal(t, len(b), n)
 	}
 
+	<-time.After(time.Millisecond * 250)
+
 	fileCount(dir, 10, t)
 
 	forRemove, forCompress, err := l.collectFilesForSweep()
