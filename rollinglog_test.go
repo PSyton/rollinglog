@@ -71,7 +71,9 @@ func TestAutoRotate(t *testing.T) {
 	assert.Equal(t, len(b), n)
 
 	existsWithContent(lf, b, t)
-	fileCount(dir, 1, t)
+	count, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, count)
 
 	b = []byte("987654321")
 
@@ -80,7 +82,10 @@ func TestAutoRotate(t *testing.T) {
 	assert.Equal(t, len(b), n)
 
 	existsWithContent(lf, b, t)
-	fileCount(dir, 2, t)
+
+	count, err = getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 2, count)
 }
 
 func TestFirstWriteWithRotate(t *testing.T) {
@@ -97,7 +102,9 @@ func TestFirstWriteWithRotate(t *testing.T) {
 	require.NoError(t, l.Close())
 
 	existsWithContent(lf, b, t)
-	fileCount(dir, 1, t)
+	count, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, count)
 
 	l = New(LogFile(lf), MaxBytes(10), MaxBackups(5), MaxAge(7))
 
@@ -108,7 +115,10 @@ func TestFirstWriteWithRotate(t *testing.T) {
 	assert.Equal(t, len(b), n)
 
 	existsWithContent(lf, b, t)
-	fileCount(dir, 2, t)
+	count, err = getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 2, count)
+
 	require.NoError(t, l.Close())
 }
 
@@ -169,7 +179,10 @@ func TestNewFile(t *testing.T) {
 
 	assert.Equal(t, len(b), n)
 	existsWithContent(lf, b, t)
-	fileCount(dir, 1, t)
+
+	count, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, count)
 }
 
 func TestWriteTooLong(t *testing.T) {
@@ -215,7 +228,10 @@ func TestOpenExisting(t *testing.T) {
 	assert.Equal(t, len(b), n)
 
 	existsWithContent(lf, append(data, b...), t)
-	fileCount(dir, 1, t)
+
+	count, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, count)
 }
 
 func TestMakeLogDir(t *testing.T) {
@@ -233,7 +249,10 @@ func TestMakeLogDir(t *testing.T) {
 
 	assert.Equal(t, len(b), n)
 	existsWithContent(lf, b, t)
-	fileCount(dir, 1, t)
+
+	count, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, count)
 }
 
 func TestFilterBackups(t *testing.T) {
@@ -291,12 +310,11 @@ func TestCollectFilesForSweep(t *testing.T) {
 		n, err := l.Write(b)
 		require.NoError(t, err)
 		assert.Equal(t, len(b), n)
+
+		count, err := getFilesInDir(t, dir)
+		require.NoError(t, err)
+		assert.Equal(t, i+1, count)
 	}
-
-	// Github actions too slow and we wait
-	<-time.After(time.Second)
-
-	fileCount(dir, 10, t)
 
 	forRemove, forCompress, err := l.collectFilesForSweep()
 
@@ -412,7 +430,10 @@ func TestCleanup(t *testing.T) {
 
 	l.wg.Wait()
 
-	fileCount(dir, 2, t)
+	count, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 2, count)
+
 	assert.True(t, atomic.LoadInt32(&l.sweepings) == 0)
 }
 
@@ -436,8 +457,13 @@ func TestCompressing(t *testing.T) {
 	require.NoError(t, l.Close())
 
 	assert.True(t, atomic.LoadInt32(&l.sweepings) == 0)
-	fileCount(dir, 2, t)
-	gzFileCount(dir, 1, t)
+	count, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 2, count)
+
+	count, err = gzFileCount(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, count)
 }
 
 func TestConcurency(t *testing.T) {
@@ -468,13 +494,18 @@ func TestConcurency(t *testing.T) {
 	wg.Wait()
 
 	assert.True(t, atomic.LoadInt32(&l.sweepings) == 0)
-	fileCount(dir, 1, t)
+
+	fc, err := getFilesInDir(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 1, fc)
 
 	info, err := os.Stat(lf)
 	require.NoError(t, err)
 	assert.Equal(t, int64(count*count*len(b)), info.Size())
 
-	gzFileCount(dir, 0, t)
+	count, err = gzFileCount(t, dir)
+	require.NoError(t, err)
+	assert.Equal(t, 0, count)
 }
 
 func makeTempDir(name string, t *testing.T) string {
@@ -484,17 +515,19 @@ func makeTempDir(name string, t *testing.T) string {
 	return dir
 }
 
-func fileCount(dir string, exp int, t testing.TB) {
+func getFilesInDir(t testing.TB, dir string) (int, error) {
 	files, err := ioutil.ReadDir(dir)
-	require.NoError(t, err)
-
-	// Make sure no other files were created.
-	assert.Equal(t, exp, len(files))
+	if err != nil {
+		return 0, err
+	}
+	return len(files), nil
 }
 
-func gzFileCount(dir string, exp int, t testing.TB) {
+func gzFileCount(t testing.TB, dir string) (int, error) {
 	files, err := ioutil.ReadDir(dir)
-	require.NoError(t, err)
+	if err != nil {
+		return 0, err
+	}
 
 	var count int
 	for _, f := range files {
@@ -503,7 +536,7 @@ func gzFileCount(dir string, exp int, t testing.TB) {
 		}
 	}
 
-	assert.Equal(t, exp, count)
+	return count, nil
 }
 
 func existsWithContent(path string, content []byte, t testing.TB) {
