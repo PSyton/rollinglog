@@ -293,7 +293,8 @@ func TestCollectFilesForSweep(t *testing.T) {
 		assert.Equal(t, len(b), n)
 	}
 
-	<-time.After(time.Millisecond * 250)
+	// Github actions too slow and we wait
+	<-time.After(time.Second)
 
 	fileCount(dir, 10, t)
 
