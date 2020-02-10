@@ -59,10 +59,10 @@ If *MaxBackups* and *MaxAge* are both 0, no old log files will be deleted.
 
 `rollinglog.New` accepts functional options:
 
-* `rollinglog.LogFile(aFilnename string)` - sets log file name with path. By default logger use file name `os.Args[0]-rollinglog.log` and place it in `os.TempDir()`
-* `rollinglog.MaxBytes(aSize uint64)` - limits log size in bytes. When limit exceeded log will be rotated. (Defailt: 0 - never rotate)
-* `rollinglog.MaxBackups(aCount int)` - sets the max count of backups to store (Default: 0 - no limit)
-* `rollinglog.MaxAge(aDays int)` - sets the number of days to store backups (Default: 0 - no limit)
-* `rollinglog.Compression(aCompression bool)` - allows to enable compression for backups (disabled by default)
-* `rollinglog.Localtime(aLocaltime bool)` - allows use local time for timestamps instead default UTC
-* `rollinglog.ErrorHandler(eh ErrHandler)` - allows to set error handler for logger.
+* `rollinglog.WithLogFile(aFilnename string)` - sets log file name with path. By default logger use file name `os.Args[0]-rollinglog.log` and place it in `os.TempDir()`
+* `rollinglog.WithMaxBytes(aSize uint64)` - limits log size in bytes. When limit exceeded log will be rotated. (Defailt: 0 - never rotate)
+* `rollinglog.WithMaxBackups(aCount int)` - sets the max count of backups to store (Default: 0 - no limit)
+* `rollinglog.WithMaxAge(aDays int)` - sets the number of days to store backups (Default: 0 - no limit)
+* `rollinglog.UseCompression` - allows to enable compression for backups (disabled by default)
+* `rollinglog.UseLocaltime` - allows use local time for timestamps instead default UTC
+* `rollinglog.WithErrorHandler(eh ErrHandler)` - allows to set error handler for logger.

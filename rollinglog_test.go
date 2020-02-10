@@ -35,10 +35,10 @@ func TestWidthErrorHandler(t *testing.T) {
 
 	var eh ErrHandler = func(error) {}
 
-	l = New(ErrorHandler(eh))
+	l = New(WithErrorHandler(eh))
 	assert.Equal(t, reflect.ValueOf(eh), reflect.ValueOf(l.errHandler))
 
-	l = New(ErrorHandler(nil))
+	l = New(WithErrorHandler(nil))
 	assert.Equal(t, def, reflect.ValueOf(l.errHandler))
 }
 
@@ -57,7 +57,7 @@ func TestAutoRotate(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf), MaxBytes(10), MaxBackups(5), MaxAge(7))
+	l := New(WithLogFile(lf), WithMaxBytes(10), WithMaxBackups(5), WithMaxAge(7))
 	defer l.Close()
 
 	b := []byte("123456789")
@@ -88,7 +88,7 @@ func TestFirstWriteWithRotate(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf), MaxBytes(10), MaxBackups(5), MaxAge(7))
+	l := New(WithLogFile(lf), WithMaxBytes(10), WithMaxBackups(5), WithMaxAge(7))
 
 	b := []byte("123456789")
 	n, err := l.Write(b)
@@ -101,7 +101,7 @@ func TestFirstWriteWithRotate(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, count)
 
-	l = New(LogFile(lf), MaxBytes(10), MaxBackups(5), MaxAge(7))
+	l = New(WithLogFile(lf), WithMaxBytes(10), WithMaxBackups(5), WithMaxAge(7))
 
 	b = []byte("987654321")
 
@@ -165,7 +165,7 @@ func TestNewFile(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf))
+	l := New(WithLogFile(lf))
 	defer l.Close()
 
 	b := []byte("asdfg")
@@ -187,7 +187,7 @@ func TestWriteTooLong(t *testing.T) {
 	maxBytes := 10
 
 	lf := logFile(dir)
-	l := New(LogFile(lf), MaxBytes(uint64(maxBytes)))
+	l := New(WithLogFile(lf), WithMaxBytes(uint64(maxBytes)))
 	defer l.Close()
 
 	b := []byte("12345678901")
@@ -213,7 +213,7 @@ func TestOpenExisting(t *testing.T) {
 	require.NoError(t, err)
 	existsWithContent(lf, data, t)
 
-	l := New(LogFile(lf))
+	l := New(WithLogFile(lf))
 	defer l.Close()
 
 	b := []byte("12345678901")
@@ -235,7 +235,7 @@ func TestMakeLogDir(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf))
+	l := New(WithLogFile(lf))
 	defer l.Close()
 
 	b := []byte("asdfg")
@@ -297,7 +297,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf), MaxBytes(10))
+	l := New(WithLogFile(lf), WithMaxBytes(10))
 
 	b := []byte("123456789")
 
@@ -321,7 +321,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 
 	require.NoError(t, l.Close())
 
-	l = New(LogFile(lf), MaxBytes(10), Compression(true))
+	l = New(WithLogFile(lf), WithMaxBytes(10), UseCompression)
 
 	forRemove, forCompress, err = l.collectFilesForSweep()
 
@@ -331,7 +331,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 
 	require.NoError(t, l.Close())
 
-	l = New(LogFile(lf), MaxBytes(10), Compression(true), MaxBackups(2))
+	l = New(WithLogFile(lf), WithMaxBytes(10), UseCompression, WithMaxBackups(2))
 
 	forRemove, forCompress, err = l.collectFilesForSweep()
 	require.NoError(t, err)
@@ -340,7 +340,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 
 	require.NoError(t, l.Close())
 
-	l = New(LogFile(lf), MaxBytes(10), MaxBackups(4))
+	l = New(WithLogFile(lf), WithMaxBytes(10), WithMaxBackups(4))
 
 	forRemove, forCompress, err = l.collectFilesForSweep()
 	require.NoError(t, err)
@@ -350,7 +350,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 	require.NoError(t, os.Rename(forRemove[0], forRemove[0]+compressSuffix))
 	require.NoError(t, l.Close())
 
-	l = New(LogFile(lf), MaxBytes(10), MaxBackups(2), Compression(true))
+	l = New(WithLogFile(lf), WithMaxBytes(10), WithMaxBackups(2), UseCompression)
 
 	forRemove, forCompress, err = l.collectFilesForSweep()
 	require.NoError(t, err)
@@ -366,7 +366,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 
 	require.NoError(t, l.Close())
 
-	l = New(LogFile(lf), MaxBytes(10), MaxAge(1))
+	l = New(WithLogFile(lf), WithMaxBytes(10), WithMaxAge(1))
 
 	forRemove, forCompress, err = l.collectFilesForSweep()
 	require.NoError(t, err)
@@ -388,7 +388,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 
 	require.NoError(t, l.Close())
 
-	l = New(LogFile(lf), MaxBytes(10), Compression(true), MaxAge(1))
+	l = New(WithLogFile(lf), WithMaxBytes(10), UseCompression, WithMaxAge(1))
 
 	forRemove, forCompress, err = l.collectFilesForSweep()
 	require.NoError(t, err)
@@ -396,7 +396,7 @@ func TestCollectFilesForSweep(t *testing.T) {
 	assert.Equal(t, 7, len(forCompress))
 
 	require.NoError(t, l.Close())
-	l = New(LogFile(lf), MaxBytes(10), Compression(true), MaxBackups(6))
+	l = New(WithLogFile(lf), WithMaxBytes(10), UseCompression, WithMaxBackups(6))
 
 	forRemove, forCompress, err = l.collectFilesForSweep()
 	require.NoError(t, err)
@@ -414,7 +414,7 @@ func TestCleanup(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf), MaxBackups(1), MaxBytes(10))
+	l := New(WithLogFile(lf), WithMaxBackups(1), WithMaxBytes(10))
 	defer l.Close()
 
 	b := []byte("123456789")
@@ -439,7 +439,7 @@ func TestCompressing(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf), MaxBytes(10), MaxBackups(1), Compression(true))
+	l := New(WithLogFile(lf), WithMaxBytes(10), WithMaxBackups(1), UseCompression)
 
 	b := []byte("123456789")
 
@@ -468,7 +468,7 @@ func TestConcurency(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	lf := logFile(dir)
-	l := New(LogFile(lf), MaxBytes(10000), MaxBackups(1), Compression(true))
+	l := New(WithLogFile(lf), WithMaxBytes(10000), WithMaxBackups(1), UseCompression)
 	defer l.Close()
 
 	b := []byte("123456789")
