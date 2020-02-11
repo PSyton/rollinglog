@@ -14,7 +14,7 @@ io.Writer, including the standard library's log package.
 
 ## Install
 
-go get github.com/PSyton/rollinglog
+`go get github.com/PSyton/rollinglog`
 
 ## Usage
 

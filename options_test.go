@@ -25,4 +25,8 @@ func TestOptions(t *testing.T) {
 
 	UseLocaltime(l)
 	assert.True(t, l.localtime)
+
+	Options(WithMaxBackups(0), WithMaxAge(20))(l)
+	assert.Equal(t, 0, l.backupsCountLimit)
+	assert.Equal(t, 20, l.backupsDaysLimit)
 }
